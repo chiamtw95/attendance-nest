@@ -19,6 +19,7 @@ export class AuthService {
           email: dto.email,
         },
       });
+      delete user.passwordHash;
       return user;
     } catch (error) {
       if (
