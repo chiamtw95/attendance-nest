@@ -22,7 +22,7 @@ model Lecturer {
 }
 
 model Student {
-  id Int@id @default(autoincrement())
+  id Int @id @default(autoincrement())
   role Role @default(USER)
   email String @unique
   passwordHash String
