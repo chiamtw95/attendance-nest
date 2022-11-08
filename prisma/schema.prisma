@@ -8,56 +8,55 @@ datasource db {
 }
 
 model Lecturer {
-  id Int@id @default(autoincrement())
-  role Role @default(ADMIN)
-  email String @unique
+  id           String @id @default(uuid())
+  email        String @unique
+  name         String @unique
+  role         Role   @default(ADMIN)
   passwordHash String
-  name String
 
   session Session[]
-  subjectId Int[] 
-  subject Subject[] 
+  subject Subject[]
 
   @@map("lecturer")
 }
 
 model Student {
-  id Int @id @default(autoincrement())
-  role Role @default(USER)
-  email String @unique
+  id           String @id @default(uuid())
+  email        String @unique
+  name         String @unique
+  role         Role   @default(USER)
   passwordHash String
-  name String @unique
 
-  sessionId Int[] 
   sessions Session[]
-  subjectId Int[] 
-  subject Subject[] 
-  
+  subject  Subject[]
+
   @@map("student")
 }
 
 model Subject {
-  id Int@id @default(autoincrement())
-  subjectName String
-  subjectCode String
+  id          String @id @default(uuid())
+  subjectName String @unique
+  subjectCode String @unique
 
   sessions Session[]
-  student Student[]
-  lecturer Lecturer[] 
+  student  Student[]
+  lecturer Lecturer[]
+
   @@map("subject")
 }
-    
 
-model Session{
-  id Int @id @default(autoincrement())
-  date DateTime @default(now())
-  
-  studentId Int[] 
-  student Student[] 
-  subjectId Int 
-  subject Subject @relation(fields: [subjectId], references: [id])
-  lecturerId Int 
-  lecturer Lecturer @relation(fields: [lecturerId], references: [id])
+model Session {
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
+  sessionCode String?  @unique
+
+  student Student[]
+
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String
+
+  lecturer   Lecturer @relation(fields: [lecturerId], references: [id])
+  lecturerId String
 
   @@map("session")
 }

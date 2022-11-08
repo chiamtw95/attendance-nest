@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import * as argon from 'argon2';
 import { PrismaService } from './../prisma/prisma.service';
@@ -9,10 +10,10 @@ import { AuthDto, SignupDto } from './dto';
 export class AuthService {
   constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
-  async signup(dto: SignupDto) {
+  async lectSignup(dto: SignupDto) {
     const hash = await argon.hash(dto.password);
     try {
-      const user = await this.prisma.student.create({
+      const user = await this.prisma.lecturer.create({
         data: {
           name: dto.name,
           passwordHash: hash,
@@ -31,12 +32,44 @@ export class AuthService {
     }
   }
 
+  async signup(dto: SignupDto, role?: Role) {
+    const hash = await argon.hash(dto.password);
+    try {
+      const user = await this.prisma.student.create({
+        data: {
+          name: dto.name,
+          passwordHash: hash,
+          email: dto.email,
+          role: role,
+        },
+      });
+      delete user.passwordHash;
+      return user;
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      )
+        throw new ForbiddenException('Credentials taken');
+      throw error;
+    }
+  }
+
   async signin(dto: AuthDto) {
-    const user = await this.prisma.student.findUnique({
+    let user;
+    user = await this.prisma.student.findUnique({
       where: {
         email: dto.email,
       },
     });
+
+    if (!user) {
+      user = await this.prisma.lecturer.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
+    }
 
     if (!user) throw new ForbiddenException('Incorrect credentials ');
 
@@ -46,21 +79,30 @@ export class AuthService {
 
     delete user.passwordHash;
 
-    const token = await this.signToken(user.id, user.email);
+    const token = await this.signToken(
+      user.id,
+      user.email,
+      user.role,
+      user.name,
+    );
 
     return token;
   }
 
   async signToken(
-    userId: number,
+    userId: string,
     email: string,
+    role: string,
+    name: string,
   ): Promise<{ access_token: string }> {
     const data = {
       sub: userId,
       email,
+      role,
+      name,
     };
 
-    const token = await this.jwt.signAsync(data, { expiresIn: '15m' });
+    const token = await this.jwt.signAsync(data, { expiresIn: '2h' });
 
     return { access_token: token };
   }
