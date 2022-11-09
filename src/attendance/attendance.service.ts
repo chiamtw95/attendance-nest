@@ -76,9 +76,9 @@ export class AttendanceService {
         select: { sessionCode: true },
       });
       if (res?.sessionCode) return res;
+
       const generateSessionCode = (): string => {
         const strArr = dto.sessionId.split('-');
-        console.log('straer', strArr);
         const code = strArr.map((x) => x.charCodeAt(0).toString());
         const finalCode = code.map((x) => x.slice(-1)).join('');
         return finalCode;
@@ -87,7 +87,7 @@ export class AttendanceService {
 
       const updateRes = await this.prisma.session.update({
         where: { id: dto.sessionId },
-        data: { sessionCode: checkInCode },
+        data: { sessionCode: checkInCode, date: new Date() },
       });
       return updateRes;
     } catch (e) {

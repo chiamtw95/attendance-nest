@@ -60,7 +60,6 @@ export class SubjectController {
 
   @Patch()
   update(@Body() dto: any) {
-    console.log(dto);
     return this.subjectService.update(dto);
   }
 

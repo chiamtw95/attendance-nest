@@ -29,7 +29,6 @@ export class SessionController {
 
   @Post('checkin')
   takeAttendance(@Body() dto: any) {
-    console.log(dto);
     return this.sessionService.takeAttendance(dto);
   }
 
