@@ -8,11 +8,12 @@ datasource db {
 }
 
 model Lecturer {
-  id           String @id @default(uuid())
-  email        String @unique
-  name         String @unique
-  role         Role   @default(ADMIN)
+  id           String  @id @default(uuid())
+  email        String  @unique
+  name         String  @unique
+  role         Role    @default(ADMIN)
   passwordHash String
+  isVerified   Boolean @default(false)
 
   session Session[]
   subject Subject[]

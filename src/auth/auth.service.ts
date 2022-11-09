@@ -72,11 +72,11 @@ export class AuthService {
     }
     // invalid pw or email
     if (!user) throw new ForbiddenException('Incorrect credentials ');
-    // if user is a lecturer but not verified by admin
-
     const pwMatches = await argon.verify(user.passwordHash, dto.password);
-
     if (!pwMatches) throw new ForbiddenException('Incorrect credentials ');
+    // if user is a lecturer but not verified by admin
+    if (user.role === 'ADMIN' && user?.isVerified === false)
+      throw new ForbiddenException('Account is not verified by admin');
 
     delete user.passwordHash;
 
