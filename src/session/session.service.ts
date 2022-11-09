@@ -16,7 +16,6 @@ export class SessionService {
   constructor(private prisma: PrismaService) {}
 
   async create(createSessionDto: any) {
-    console.log(createSessionDto);
     try {
       const res = await this.prisma.session.create({
         data: {

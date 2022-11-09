@@ -9,8 +9,23 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class StudentService {
   constructor(private prisma: PrismaService) {}
 
-  create(createStudentDto: CreateStudentDto) {
-    return 'This action adds a new student';
+  async create(dto: any) {
+    const hash = await argon.hash(dto.password);
+    try {
+      const res = await this.prisma.student.create({
+        data: {
+          name: dto.name,
+          email: dto.email,
+          passwordHash: hash,
+        },
+      });
+      delete res.passwordHash;
+      return res;
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError)
+        throw new ForbiddenException('Error fetching all lecturers');
+      console.error('error finding lecturer', e);
+    }
   }
 
   findAll() {

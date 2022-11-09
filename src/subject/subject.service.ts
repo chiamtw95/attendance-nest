@@ -129,7 +129,6 @@ export class SubjectService {
           student: { select: { name: true } },
         },
       });
-      console.log(updatedList.student);
       return updatedList.student;
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError)

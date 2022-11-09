@@ -18,7 +18,6 @@ export class SessionController {
 
   @Get()
   findOne(@Query('id') id: string) {
-    console.log('gettt, ', id);
     return this.sessionService.findOne(id);
   }
 

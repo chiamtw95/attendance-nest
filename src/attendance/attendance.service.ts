@@ -9,9 +9,33 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class AttendanceService {
   constructor(private prisma: PrismaService) {}
 
-  async create(sessionId: string, studentName: string) {
+  async takeAttendance(sessionId: string, studentName: string) {
     try {
-      const res = await this.prisma.session.update({
+      const subject = await this.prisma.session.findUnique({
+        where: { id: sessionId },
+        include: {
+          subject: { select: { student: { select: { name: true } } } },
+          student: { select: { name: true } },
+        },
+      });
+
+      // check if student is enrolled
+      const isEnrolled = subject.subject.student.find(
+        (x) => x.name === studentName,
+      );
+      const isAlreadyCheckedIn = subject.student.find(
+        (x) => x.name === studentName,
+      );
+      if (!isEnrolled)
+        return {
+          errorMessage: `You are enrolled in this subject, ${studentName}`,
+        };
+      if (isAlreadyCheckedIn)
+        return {
+          infoMessage: `You have already checked in, ${studentName}`,
+        };
+
+      await this.prisma.session.update({
         where: {
           id: sessionId,
         },
@@ -20,7 +44,7 @@ export class AttendanceService {
         },
       });
 
-      return res;
+      return;
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002')
         throw new ForbiddenException('SessionId invalid.');
@@ -69,7 +93,6 @@ export class AttendanceService {
   }
 
   async findOrcreateCheckInCode(dto: any) {
-    console.log('dto', dto);
     try {
       const res = await this.prisma.session.findUnique({
         where: { id: dto.sessionId },
@@ -98,7 +121,6 @@ export class AttendanceService {
   }
   async findCheckedInStudents(dto: any) {
     const notCheckedIn = [];
-    console.log(dto);
     try {
       const session = await this.prisma.session.findUnique({
         where: { id: dto.sessionId },

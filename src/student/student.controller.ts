@@ -16,8 +16,8 @@ export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
   @Post()
-  create(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentService.create(createStudentDto);
+  create(@Body() dto: any) {
+    return this.studentService.create(dto);
   }
 
   @Get()
@@ -32,7 +32,6 @@ export class StudentController {
 
   @Patch('passwordchange')
   update(@Body() dto: any) {
-    console.log(dto);
     return this.studentService.updatePW(dto);
   }
 

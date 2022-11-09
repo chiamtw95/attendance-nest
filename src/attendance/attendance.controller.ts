@@ -8,13 +8,11 @@ export class AttendanceController {
 
   @Get('checkincode')
   createCheckinCode(@Query() dto: any) {
-    console.log(dto);
     return this.attendanceService.findOrcreateCheckInCode(dto);
   }
 
   @Get('checkincode/studentList')
   getStudentsList(@Query() dto: any) {
-    // console.log(dto);
     return this.attendanceService.findCheckedInStudents(dto);
   }
 }

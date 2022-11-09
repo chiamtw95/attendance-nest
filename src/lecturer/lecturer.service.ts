@@ -7,6 +7,25 @@ import * as argon from 'argon2';
 export class LecturerService {
   constructor(private prisma: PrismaService) {}
 
+  async registerLecturer(dto: any) {
+    const hash = await argon.hash(dto.password);
+    try {
+      const res = await this.prisma.lecturer.create({
+        data: {
+          name: dto.name,
+          email: dto.email,
+          passwordHash: hash,
+        },
+      });
+      delete res.passwordHash;
+      return res;
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError)
+        throw new ForbiddenException('Error fetching all lecturers');
+      console.error('error finding lecturer', e);
+    }
+  }
+
   async findAll() {
     try {
       const res = await this.prisma.lecturer.findMany({

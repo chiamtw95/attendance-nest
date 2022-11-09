@@ -1,14 +1,14 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { LecturerService } from './lecturer.service';
 
 @Controller('lecturer')
 export class LecturerController {
   constructor(private readonly lecturerService: LecturerService) {}
 
-  // @Post()
-  // // create(@Body() createLecturerDto: CreateLecturerDto) {
-  // //   return this.lecturerService.create(createLecturerDto);
-  // // }
+  @Post()
+  register(@Body() dto: any) {
+    return this.lecturerService.registerLecturer(dto);
+  }
 
   @Get()
   findAll() {
@@ -22,7 +22,6 @@ export class LecturerController {
 
   @Patch('passwordchange')
   update(@Body() dto: any) {
-    console.log(dto);
     return this.lecturerService.updatePW(dto);
   }
 
