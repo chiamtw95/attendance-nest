@@ -11,8 +11,18 @@ export class AttendanceController {
     return this.attendanceService.findOrcreateCheckInCode(dto);
   }
 
+  @Get('attendeesList')
+  findAttendees(@Query('sessionId') sessionId: string) {
+    return this.attendanceService.findAll(sessionId);
+  }
+
   @Get('checkincode/studentList')
   getStudentsList(@Query() dto: any) {
     return this.attendanceService.findCheckedInStudents(dto);
+  }
+
+  @Get('report')
+  getReport(@Query() dto: any) {
+    return this.attendanceService.getReportData(dto);
   }
 }

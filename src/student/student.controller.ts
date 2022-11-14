@@ -30,7 +30,7 @@ export class StudentController {
     return this.studentService.findOne(+id);
   }
 
-  @Patch('passwordchange')
+  @Post('passwordchange')
   update(@Body() dto: any) {
     return this.studentService.updatePW(dto);
   }

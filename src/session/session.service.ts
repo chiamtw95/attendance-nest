@@ -92,8 +92,14 @@ export class SessionService {
         data: {
           student: { connect: { id: dto.studentId } },
         },
+        include: {
+          subject: true,
+        },
       });
-      return res;
+      return {
+        res,
+        message: `You have succesfully checked in to ${res.subject.subjectCode} ${res.subject.subjectName}!`,
+      };
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError && e.code === 'P2016')
         throw new HttpException('Check in code invalid ', HttpStatus.NOT_FOUND);

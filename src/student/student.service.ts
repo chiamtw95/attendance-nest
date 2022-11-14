@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UseFilters, HttpException } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { ForbiddenException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
@@ -37,8 +37,15 @@ export class StudentService {
   }
 
   async updatePW(dto: any) {
-    const newHash = await argon.hash(dto.pw);
+    const newHash = await argon.hash(dto.newpw);
     try {
+      const forChecking = await this.prisma.student.findUnique({
+        where: { id: dto.id },
+      });
+
+      const pwMatches = await argon.verify(forChecking.passwordHash, dto.pw);
+      if (!pwMatches) throw new ForbiddenException('Incorrect Password');
+
       const res = await this.prisma.student.update({
         where: { id: dto.id },
         data: {
@@ -48,7 +55,8 @@ export class StudentService {
       return { message: 'Password updated!' };
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError)
-        throw new ForbiddenException('Error updating pw lec');
+        throw new ForbiddenException('Error updating pw student');
+      else throw new ForbiddenException('Incorrect Password');
       console.error('Error updating pw lec', e);
     }
   }

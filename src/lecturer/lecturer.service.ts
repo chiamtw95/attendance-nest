@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as argon from 'argon2';
@@ -55,18 +60,26 @@ export class LecturerService {
   }
 
   async updatePW(dto: any) {
-    const newHash = await argon.hash(dto.pw);
+    const newHash = await argon.hash(dto.newpw);
     try {
+      const forChecking = await this.prisma.lecturer.findUnique({
+        where: { id: dto.id },
+      });
+      const pwMatches = await argon.verify(forChecking.passwordHash, dto.pw);
+      if (!pwMatches) throw new ForbiddenException('Incorrect Password');
+
       const res = await this.prisma.lecturer.update({
         where: { id: dto.id },
         data: {
           passwordHash: newHash,
         },
       });
+
       return { message: 'Password updated!' };
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError)
         throw new ForbiddenException('Error updating pw lec');
+      else throw new ForbiddenException('Incorrect Password');
       console.error('Error updating pw lec', e);
     }
   }

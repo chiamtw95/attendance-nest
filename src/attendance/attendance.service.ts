@@ -151,4 +151,22 @@ export class AttendanceService {
       console.error('error finding checked-in students', e);
     }
   }
+
+  async getReportData(dto: any) {
+    try {
+      const reportdata = await this.prisma.subject.findUnique({
+        where: { subjectCode: dto.subjectCode },
+        // select: { sessions: { where: { date: { lte: new Date(dto.date) } } } },
+        include: {
+          student: { select: { name: true } },
+          sessions: { include: { student: { select: { name: true } } } },
+        },
+      });
+      return reportdata;
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002')
+        throw new ForbiddenException('Session id invalid.');
+      console.error('error finding checked-in students', e);
+    }
+  }
 }
