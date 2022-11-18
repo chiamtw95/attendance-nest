@@ -1,10 +1,8 @@
-FROM node:alpine
+FROM node:alpine as builder
 WORKDIR /nestapp
-COPY package*.json ./
-RUN npx prisma migrate dev
-RUN npx prisma generate
-RUN yarn
+
 COPY . .
-RUN yarn build
+RUN npm run build
+
 EXPOSE 3000
-CMD [ "node", "dist/main.js" ]
+CMD [ "npm", "run", "start:prod" ]
